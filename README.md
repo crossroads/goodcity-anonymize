@@ -12,6 +12,8 @@ Creates an anonymised SQL dump of the specified goodcity database
 The script connects to cloudinary to replace Goodcity images with test images
 The reason for that is that sharing the ID between multiple environments might result in an accidental deletion of the image
 
+The script will randomly select an image from the 'test' folder
+
 ```bash
 export CLOUDINARY_CLOUD_NAME=cloud_name
 export CLOUDINARY_API_KEY=api_key
