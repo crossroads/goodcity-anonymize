@@ -41,7 +41,7 @@ conn.close
 begin
   database 'Goodcity' do
     strategy DataAnon::Strategy::Blacklist
-    source_db({
+    connection_spec = {
       :adapter => 'postgresql',
       :host => 'localhost',
       :port => 5432,
@@ -49,7 +49,9 @@ begin
       :username => username,
       :password => password,
       :database => db_output
-    })
+    }
+
+    source_db connection_spec
 
     table 'addresses' do
       primary_key 'id'
@@ -60,7 +62,7 @@ begin
 
     table 'auth_tokens' do
       primary_key 'id'
-      anonymize 'otp_secret_key', 'otp_auth_key'
+      anonymize 'otp_secret_key', 'otp_auth_key', 'otp_code_expiry'
     end
 
     table 'braintree_transactions' do
@@ -74,12 +76,38 @@ begin
       anonymize('first_name').using FieldStrategy::StringTemplate.new('John#{row_number}')
       anonymize('last_name').using FieldStrategy::StringTemplate.new('Doe#{row_number}')
       anonymize('phone_number').using FieldStrategy::RandomPhoneNumber.new
+      anonymize('title') { ['Mr', 'Mrs', 'Ms'].sample }
+    end
+
+    table 'boxes' do
+      primary_key 'id'
+      anonymize 'comments'
     end
 
     table 'contacts' do
       primary_key 'id'
       anonymize('name').using FieldStrategy::RandomFullName.new
       anonymize('mobile').using FieldStrategy::RandomPhoneNumber.new
+    end
+
+    table 'gogovan_orders' do
+      primary_key 'id'
+      anonymize('driver_license')
+      anonymize('driver_mobile').using FieldStrategy::RandomPhoneNumber.new
+      anonymize('driver_name').using FieldStrategy::RandomFullName.new
+      anonymize('booking_id') { nil }
+      anonymize('ggv_uuid') { nil }
+    end
+
+    table 'goodcity_requests' do
+      primary_key 'id'
+      anonymize('description').using FieldStrategy::LoremIpsum.new
+    end
+
+    table 'items' do
+      primary_key 'id'
+      anonymize 'reject_reason', 'rejection_comments'
+      anonymize('donor_description').using FieldStrategy::LoremIpsum.new
     end
 
     table 'images' do
@@ -90,6 +118,41 @@ begin
     table 'messages' do
       primary_key 'id'
       anonymize('body').using FieldStrategy::RandomString.new
+    end
+
+    table 'offers' do
+      primary_key 'id'
+      anonymize 'cancel_reason'
+      anonymize('notes').using FieldStrategy::LoremIpsum.new
+    end
+
+    table 'orders' do
+      primary_key 'id'
+      anonymize('purpose_description').using FieldStrategy::LoremIpsum.new
+      anonymize('description').using FieldStrategy::LoremIpsum.new
+    end
+
+    table 'organisations' do
+      primary_key 'id'
+      anonymize('name_en').using FieldStrategy::StringTemplate.new('Organisation #{row_number}')
+      anonymize('name_zh_tw').using FieldStrategy::StringTemplate.new('Organisation_zh #{row_number}')
+      anonymize('description_en') { nil }
+      anonymize('description_zh_tw') { nil }
+      anonymize('registration') { nil }
+      anonymize('website') { 'N.A.' }
+      anonymize('country_id').using FieldStrategy::SelectFromDatabase.new("countries","id", connection_spec)
+      anonymize('gih3_id') { 'nil' }
+    end
+
+    table 'organisations_users' do
+      primary_key 'id'
+      anonymize 'position'
+    end
+
+    table 'packages' do
+      primary_key 'id'
+      anonymize 'inventory_number', 'designation_name', 'case_number'
+      anonymize('notes').using FieldStrategy::SelectFromDatabase.new("package_categories","name_en", connection_spec)
     end
 
     table 'stockit_contacts' do
@@ -104,6 +167,18 @@ begin
       primary_key 'id'
       anonymize 'hkid_number', 'reference_number' # @Steve -> what's the reference number
       anonymize('client_name').using FieldStrategy::RandomFullName.new
+      anonymize('purpose_of_goods').using FieldStrategy::LoremIpsum.new
+    end
+
+    table 'stockit_organisations' do
+      primary_key 'id'
+      anonymize 'name'
+    end
+
+    table 'subscriptions' do
+      primary_key 'id'
+      anonymize 'sms_reminder_sent_at'
+      anonymize('state').using FieldStrategy::StringTemplate.new('read')
     end
 
     table 'users' do
@@ -115,7 +190,11 @@ begin
       anonymize('email').using FieldStrategy::StringTemplate.new('fake@email.com')
     end
 
-
+    table 'versions' do
+      primary_key 'id'
+      anonymize('object') { nil }
+      anonymize('object_changes') { nil }
+    end
   end
 
   cmd = "export PGPASSWORD=#{password};"
