@@ -30,9 +30,11 @@ export CLOUDINARY_API_SECRET=api_secret
 
 ## Running the script
 
-`ruby anonymize_goodcity.rb --db-source=<a local goodcity database>`
+`ruby anonymize_goodcity.rb.rb --db-source=<a local goodcity database>`
 
 This will output a `goodcity_anonymized.dump` file
+
+The same thing can be done for StockIt by running the `anonymize_stockit.rb` script
 
 ## Importing the dump into a staging environment
 
