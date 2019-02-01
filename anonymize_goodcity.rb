@@ -1,12 +1,13 @@
 require 'data-anonymization'
 require 'pg'
 require './cloudinary'
+require './inventory'
 
 DataAnon::Utils::Logging.logger.level = Logger::INFO
 
 args      = Hash[ ARGV.join(' ').scan(/--?([^=\s]+)(?:=(\S+))?/) ]
 db_source = args['db-source'];
-db_output = '__anonymized_' + Time.now.to_i.to_s
+db_output = '__anonymized_gc_' + Time.now.to_i.to_s
 username  = args.fetch('username', 'postgres');
 password  = args.fetch('password', '');
 
@@ -151,7 +152,8 @@ begin
 
     table 'packages' do
       primary_key 'id'
-      anonymize 'inventory_number', 'designation_name', 'case_number'
+      anonymize 'designation_name', 'case_number'
+      anonymize('inventory_number') { |field| Inventory.anonymize_code(field.value) }
       anonymize('notes').using FieldStrategy::SelectFromDatabase.new("package_categories","name_en", connection_spec)
     end
 
