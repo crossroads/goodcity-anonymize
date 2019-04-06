@@ -66,11 +66,6 @@ begin
       anonymize 'otp_secret_key', 'otp_auth_key', 'otp_code_expiry'
     end
 
-    table 'braintree_transactions' do
-      primary_key 'id'
-      anonymize 'transaction_id', 'customer_id', 'amount'
-    end
-
     table 'beneficiaries' do
       primary_key 'id'
       anonymize 'identity_number'
