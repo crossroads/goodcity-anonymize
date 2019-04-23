@@ -4,6 +4,4 @@ source "https://rubygems.org"
 
 gem "data-anonymization"
 gem "postgresql"
-gem 'hashids'
-
-# gem "rails"
+gem 'rspec'
